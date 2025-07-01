@@ -37,13 +37,16 @@ services:
       WORDPRESS_DB_USER: wp_sou
       WORDPRESS_DB_PASSWORD: Aa0343561287
       WORDPRESS_DB_NAME: wp_plantshop
+      PHP_UPLOAD_MAX_FILESIZE: 64M
+      PHP_POST_MAX_SIZE: 64M
     volumes:
       - ./wordpress:/var/www/html
       - ./uploads:/var/www/html/wp-content/uploads
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
       - wp_plantshop_network
 
-  # phpMyAdmin (tùy chọn)
+  # phpMyAdmin
   phpmyadmin:
     depends_on:
       db:
