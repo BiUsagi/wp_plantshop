@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  # Database MySQL
+  db:
+    image: mysql:5.7
+    container_name: wp_plantshop_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: 'no'
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306" 
+    networks:
+      - wp_plantshop_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # WordPress
+  wordpress:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: wordpress:latest
+    container_name: wp_plantshop
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wp_sou
+      WORDPRESS_DB_PASSWORD: Aa0343561287
+      WORDPRESS_DB_NAME: wp_plantshop
+    volumes:
+      - ./wordpress:/var/www/html
+      - ./uploads:/var/www/html/wp-content/uploads
+    networks:
+      - wp_plantshop_network
+
+  # phpMyAdmin (tùy chọn)
+  phpmyadmin:
+    depends_on:
+      db:
+        condition: service_healthy
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: wp_plantshop_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: wp_sou
+      PMA_PASSWORD: Aa0343561287
+      MYSQL_ROOT_PASSWORD: Aa0343561287root
+      PMA_ARBITRARY: 1
+    networks:
+      - wp_plantshop_network
+
+volumes:
+  db_data:
+
+networks:
+  wp_plantshop_network:
+    driver: bridge
